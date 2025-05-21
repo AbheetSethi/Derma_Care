@@ -9,10 +9,6 @@
     - kubernetes.core
 
   tasks:
-    # Optional: ensure Kubernetes collection is installed (can be enabled for local use)
-    # - name: Install kubernetes.core collection
-    #   ansible.builtin.command: ansible-galaxy collection install kubernetes.core
-
     - name: Render backend deployment template with secrets
       ansible.builtin.template:
         src: manifests/backend-deployment.yaml.j2
