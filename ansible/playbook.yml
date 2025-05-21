@@ -1,6 +1,7 @@
 - name: Deploy to Kubernetes using Ansible
   hosts: localhost
   gather_facts: false
+
   vars_files:
     - vault/secrets.yml 
     
@@ -8,8 +9,12 @@
     - kubernetes.core
 
   tasks:
+    # Optional: ensure Kubernetes collection is installed (can be enabled for local use)
+    # - name: Install kubernetes.core collection
+    #   ansible.builtin.command: ansible-galaxy collection install kubernetes.core
+
     - name: Render backend deployment template with secrets
-      template:
+      ansible.builtin.template:
         src: manifests/backend-deployment.yaml.j2
         dest: /tmp/backend-deployment.yaml
 
@@ -17,23 +22,18 @@
       kubernetes.core.k8s:
         state: present
         src: /tmp/backend-deployment.yaml
-        
-    # - name: Deploy backend
-    #   kubernetes.core.k8s:
-    #     state: present
-    #     src: manifests/backend-deployment.yaml
 
     - name: Expose backend
       kubernetes.core.k8s:
         state: present
         src: manifests/backend-service.yaml
 
-    - name: Deploy ml-service
+    - name: Deploy ML service
       kubernetes.core.k8s:
         state: present
         src: manifests/ml-deployment.yaml
 
-    - name: Expose ml-service
+    - name: Expose ML service
       kubernetes.core.k8s:
         state: present
         src: manifests/ml-service.yaml
@@ -53,7 +53,7 @@
         state: present
         src: manifests/backend-hpa.yaml
 
-    - name: Apply ml-service HPA
+    - name: Apply ML service HPA
       kubernetes.core.k8s:
         state: present
         src: manifests/ml-service-hpa.yaml
@@ -63,7 +63,7 @@
         state: present
         src: manifests/frontend-hpa.yaml
 
-
+    # Optional port-forwarding (for local development only)
     # - name: Port forward backend service
     #   ansible.builtin.shell: kubectl port-forward service/backend 5000:5000 &
     #   async: 3600
@@ -74,7 +74,8 @@
     #   async: 3600
     #   poll: 0
 
-    # - name: Port forward ml-service service
+    # - name: Port forward ML service
     #   ansible.builtin.shell: kubectl port-forward service/ml-service 5001:5001 &
     #   async: 3600
     #   poll: 0
+
